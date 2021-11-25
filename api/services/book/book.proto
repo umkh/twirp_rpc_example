@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package book;
+
+option go_package = "./pkg/pb_book";
+
+import "google/protobuf/empty.proto";
+
+service BookAPI {
+  rpc Create (CreateReq) returns (google.protobuf.Empty);
+  rpc Get (GetReq) returns (Book);
+}
+
+message CreateReq {
+  string name = 1;
+  string author = 2;
+}
+
+message GetReq {
+  string id = 1;
+}
+
+message Book {
+  string name = 1;
+  string author = 2;
+}

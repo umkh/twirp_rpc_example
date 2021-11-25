@@ -1,0 +1,10 @@
+version: v1
+plugins:
+  - name: go
+    out: ../pkg/genproto
+    opt:
+      - paths=source_relative
+  - name: twirp
+    out: ../pkg/genproto
+    opt:
+      - paths=source_relative
