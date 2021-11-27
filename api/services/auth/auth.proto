@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "./pkg/pb_auth";
+
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+
+service Auth {
+  rpc Login(LoginReq) returns (LoginRes);
+  rpc Register(RegisterReq) returns (google.protobuf.Empty);
+  rpc Forgot(ForgotReq) returns (google.protobuf.Empty);
+  rpc Activate(ActivateReq) returns (google.protobuf.Empty);
+}
+
+message LoginReq {
+  string email = 1 [
+    (validate.rules).string = {min_len: 5, max_len: 20}
+  ];
+
+  string password = 2 [
+    (validate.rules).string = {min_len: 5, max_len: 20}
+  ];
+}
+
+message LoginRes {
+  string accessToken = 1;
+  string updateToken = 2;
+}
+
+message RegisterReq {
+  string full_name = 1;
+  string email = 2;
+  string phone = 3;
+  string sex = 4;
+  string password = 5;
+}
+
+message ActivateReq {
+  string secret_key = 1;
+}
+
+message ForgotReq {
+  string email = 1 [
+    (validate.rules).string = {min_len: 5, max_len: 20}
+  ];
+}
