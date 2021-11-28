@@ -5,22 +5,23 @@ package book;
 option go_package = "./pkg/pb_book";
 
 import "google/protobuf/empty.proto";
+import "validate/validate.proto";
 
 service BookAPI {
   rpc Create (CreateReq) returns (google.protobuf.Empty);
-  rpc Get (GetReq) returns (Book);
+  rpc List (google.protobuf.Empty) returns (ListRes);
 }
 
 message CreateReq {
-  string name = 1;
-  string author = 2;
+  string name = 1 [(validate.rules).string = {min_len: 4, max_len: 255}];
+  string author = 2 [(validate.rules).string = {min_len: 3, max_len: 50}];
 }
 
-message GetReq {
-  string id = 1;
+message ListRes {
+  repeated Book books = 1;
 }
 
 message Book {
-  string name = 1;
-  string author = 2;
+  string name = 1 [(validate.rules).string = {min_len: 4, max_len: 255}];
+  string author = 2 [(validate.rules).string = {min_len: 3, max_len: 50}];
 }

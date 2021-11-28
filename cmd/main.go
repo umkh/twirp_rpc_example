@@ -18,5 +18,5 @@ func main() {
 		cancel()
 	}()
 
-	application.Run(ctx)
+	application.Start(ctx)
 }

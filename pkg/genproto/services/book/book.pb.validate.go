@@ -57,9 +57,27 @@ func (m *CreateReq) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Name
+	if l := utf8.RuneCountInString(m.GetName()); l < 4 || l > 255 {
+		err := CreateReqValidationError{
+			field:  "Name",
+			reason: "value length must be between 4 and 255 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Author
+	if l := utf8.RuneCountInString(m.GetAuthor()); l < 3 || l > 50 {
+		err := CreateReqValidationError{
+			field:  "Author",
+			reason: "value length must be between 3 and 50 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return CreateReqMultiError(errors)
@@ -137,41 +155,73 @@ var _ interface {
 	ErrorName() string
 } = CreateReqValidationError{}
 
-// Validate checks the field values on GetReq with the rules defined in the
+// Validate checks the field values on ListRes with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *GetReq) Validate() error {
+func (m *ListRes) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GetReq with the rules defined in the
+// ValidateAll checks the field values on ListRes with the rules defined in the
 // proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in GetReqMultiError, or nil if none found.
-func (m *GetReq) ValidateAll() error {
+// a list of violation errors wrapped in ListResMultiError, or nil if none found.
+func (m *ListRes) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GetReq) validate(all bool) error {
+func (m *ListRes) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Id
+	for idx, item := range m.GetBooks() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListResValidationError{
+						field:  fmt.Sprintf("Books[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListResValidationError{
+						field:  fmt.Sprintf("Books[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListResValidationError{
+					field:  fmt.Sprintf("Books[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	if len(errors) > 0 {
-		return GetReqMultiError(errors)
+		return ListResMultiError(errors)
 	}
 	return nil
 }
 
-// GetReqMultiError is an error wrapping multiple validation errors returned by
-// GetReq.ValidateAll() if the designated constraints aren't met.
-type GetReqMultiError []error
+// ListResMultiError is an error wrapping multiple validation errors returned
+// by ListRes.ValidateAll() if the designated constraints aren't met.
+type ListResMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GetReqMultiError) Error() string {
+func (m ListResMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -180,11 +230,11 @@ func (m GetReqMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GetReqMultiError) AllErrors() []error { return m }
+func (m ListResMultiError) AllErrors() []error { return m }
 
-// GetReqValidationError is the validation error returned by GetReq.Validate if
-// the designated constraints aren't met.
-type GetReqValidationError struct {
+// ListResValidationError is the validation error returned by ListRes.Validate
+// if the designated constraints aren't met.
+type ListResValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -192,22 +242,22 @@ type GetReqValidationError struct {
 }
 
 // Field function returns field value.
-func (e GetReqValidationError) Field() string { return e.field }
+func (e ListResValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GetReqValidationError) Reason() string { return e.reason }
+func (e ListResValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GetReqValidationError) Cause() error { return e.cause }
+func (e ListResValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GetReqValidationError) Key() bool { return e.key }
+func (e ListResValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GetReqValidationError) ErrorName() string { return "GetReqValidationError" }
+func (e ListResValidationError) ErrorName() string { return "ListResValidationError" }
 
 // Error satisfies the builtin error interface
-func (e GetReqValidationError) Error() string {
+func (e ListResValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -219,14 +269,14 @@ func (e GetReqValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGetReq.%s: %s%s",
+		"invalid %sListRes.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GetReqValidationError{}
+var _ error = ListResValidationError{}
 
 var _ interface {
 	Field() string
@@ -234,7 +284,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GetReqValidationError{}
+} = ListResValidationError{}
 
 // Validate checks the field values on Book with the rules defined in the proto
 // definition for this message. If any rules are violated, the first error
@@ -257,9 +307,27 @@ func (m *Book) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Name
+	if l := utf8.RuneCountInString(m.GetName()); l < 4 || l > 255 {
+		err := BookValidationError{
+			field:  "Name",
+			reason: "value length must be between 4 and 255 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
-	// no validation rules for Author
+	if l := utf8.RuneCountInString(m.GetAuthor()); l < 3 || l > 50 {
+		err := BookValidationError{
+			field:  "Author",
+			reason: "value length must be between 3 and 50 runes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return BookMultiError(errors)

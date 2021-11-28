@@ -2,34 +2,25 @@ package app
 
 import (
 	"context"
+	"github.com/umkh/twirp_rpc_example/internal/web/http_server"
 	"log"
 	"net/http"
 	"time"
 )
 
 type App struct {
-	mux        *http.ServeMux
 	httpServer *http.Server
 }
 
 func New() *App {
 	app := new(App)
-	app.initHttp()
+	app.httpServer = http_server.New(":8089")
 	return app
 }
 
-func (a *App) initHttp() {
-	a.mux = http.NewServeMux()
-	a.register()
-	a.httpServer = &http.Server{
-		Addr:    ":8089",
-		Handler: a.mux,
-	}
-}
-
-func (a *App) Run(ctx context.Context) {
+func (a *App) Start(ctx context.Context) {
 	go func() {
-		if err := http.ListenAndServe(":8089", a.mux); err != nil {
+		if err := a.httpServer.ListenAndServe(); err != nil {
 			panic(err)
 		}
 	}()
