@@ -2,18 +2,27 @@ package app
 
 import (
 	"context"
-	"github.com/umkh/twirp_rpc_example/internal/web/http_server"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/umkh/twirp_rpc_example/internal/config"
+	"github.com/umkh/twirp_rpc_example/internal/web/http_server"
 )
 
 type App struct {
+	cfg        config.Config
+	db         *sqlx.DB
 	httpServer *http.Server
 }
 
 func New() *App {
 	app := new(App)
+	app.cfg = config.Set()
+
+	app.initPostreSQL()
+
 	app.httpServer = http_server.New(":8089")
 	return app
 }
