@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/umkh/twirp_rpc_example/internal/app"
 	"os"
 	"os/signal"
+
+	"github.com/umkh/twirp_rpc_example/internal/app"
 )
 
 func main() {
@@ -12,6 +13,8 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 
 	application := app.New()
+	defer application.Shutdown()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		<-quit
