@@ -2,8 +2,6 @@ package http_server
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/twitchtv/twirp"
 	pb_book "github.com/umkh/twirp_rpc_example/pkg/genproto/services/book"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -11,13 +9,13 @@ import (
 
 type Book struct{}
 
-func NewBook() (string, http.HandlerFunc) {
+func NewBook() pb_book.TwirpServer {
 	srv := pb_book.NewBookAPIServer(
 		&Book{},
 		twirp.WithServerPathPrefix(urlPrefix),
 	)
 
-	return srv.PathPrefix(), middleware(srv).ServeHTTP
+	return srv
 }
 
 func (s *Book) Create(ctx context.Context, req *pb_book.CreateReq) (*emptypb.Empty, error) {
