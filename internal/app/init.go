@@ -1,18 +1,26 @@
 package app
 
 import (
+	"github.com/umkh/twirp_rpc_example/internal/store/pgsql"
+	"github.com/umkh/twirp_rpc_example/internal/web/http_server"
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 const sqlDriver = "postgres"
 
-func (a *App) initPostreSQL() {
+func (a *App) initPostgreSQL() {
 	conn, err := sqlx.Connect(sqlDriver, a.cfg.PostgreSQLURL())
 	if err != nil {
 		log.Panicf("PostgreSQL connect error: %v", err)
 	}
+	a.shutdown = append(a.shutdown, conn.Close)
 
-	a.db = conn
+	a.store = pgsql.New(conn)
+}
+
+func (a *App) initHTTPServer() {
+	a.httpServer = http_server.New(a.cfg).Server()
 }
