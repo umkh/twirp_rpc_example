@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/umkh/twirp_rpc_example/internal/dto"
+	"github.com/umkh/twirp_rpc_example/internal/entities"
 )
 
 type Container interface {
@@ -10,5 +11,5 @@ type Container interface {
 
 type Book interface {
 	Create(dto *dto.Book) error
-	List() ([]dto.Book, error)
+	List() ([]entities.Book, error)
 }

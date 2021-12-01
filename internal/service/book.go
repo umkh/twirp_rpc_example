@@ -21,6 +21,6 @@ func (b *book) Create(dto *dto.Book) error {
 	})
 }
 
-func (b *book) List() ([]dto.Book, error) {
-	return []dto.Book{}, nil
+func (b *book) List() ([]entities.Book, error) {
+	return b.store.Book().List()
 }

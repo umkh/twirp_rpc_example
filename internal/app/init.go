@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/umkh/twirp_rpc_example/internal/service"
 	"github.com/umkh/twirp_rpc_example/internal/store/pgsql"
 	"github.com/umkh/twirp_rpc_example/internal/web/http_server"
 	"log"
@@ -21,6 +22,10 @@ func (a *App) initPostgreSQL() {
 	a.store = pgsql.New(conn)
 }
 
+func (a *App) initService() {
+	a.service = service.New(a.store)
+}
+
 func (a *App) initHTTPServer() {
-	a.httpServer = http_server.New(a.cfg).Server()
+	a.httpServer = http_server.New(a.cfg, a.service).Server()
 }

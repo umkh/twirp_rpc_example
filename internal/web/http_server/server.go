@@ -2,23 +2,26 @@ package http_server
 
 import (
 	"github.com/umkh/twirp_rpc_example/internal/config"
+	"github.com/umkh/twirp_rpc_example/internal/service"
 	"net/http"
 )
 
 type Params struct {
 	cfg        config.Config
 	httpServer *http.Server
+	service    service.Container
 }
 
-func New(cfg config.Config) *Params {
+func New(cfg config.Config, service service.Container) *Params {
 	return &Params{
-		cfg: cfg,
+		cfg:     cfg,
+		service: service,
 	}
 }
 
 func (p *Params) register(mux *http.ServeMux) {
 	// Book service
-	book := NewBook()
+	book := NewBook(p.service)
 	mux.HandleFunc(book.PathPrefix(), middleware(book).ServeHTTP)
 
 }

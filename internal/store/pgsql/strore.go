@@ -16,7 +16,7 @@ func New(db *sqlx.DB) *pgsql {
 
 func (p *pgsql) Book() store.Book {
 	if p.book == nil {
-		p.book = NewBook()
+		p.book = NewBook(p.db)
 	}
 	return p.book
 }

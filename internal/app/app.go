@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"github.com/umkh/twirp_rpc_example/internal/config"
+	"github.com/umkh/twirp_rpc_example/internal/service"
 	"github.com/umkh/twirp_rpc_example/internal/store"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 type App struct {
 	cfg        config.Config
 	store      store.Store
+	service    service.Container
 	httpServer *http.Server
 	shutdown   []func() error
 }
@@ -21,6 +23,7 @@ func New() *App {
 	app.cfg = config.Set()
 
 	app.initPostgreSQL()
+	app.initService()
 	app.initHTTPServer()
 
 	return app
