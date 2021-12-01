@@ -12,6 +12,9 @@ import (
 type Config struct {
 	Environment string
 
+	HTTPHost string
+	HTTPPort string
+
 	PGHost     string
 	PGPort     int
 	PGUser     string
@@ -28,6 +31,9 @@ func Set() Config {
 	conf := Config{}
 
 	conf.Environment = cast.ToString(key("ENVIRONMENT"))
+
+	conf.HTTPHost = cast.ToString(key("HTTP_HOST"))
+	conf.HTTPPort = cast.ToString(key("HTTP_PORT"))
 
 	conf.PGHost = cast.ToString(key("PG_HOST"))
 	conf.PGPort = cast.ToInt(key("PG_PORT"))
